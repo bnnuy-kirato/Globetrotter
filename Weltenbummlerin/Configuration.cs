@@ -2,7 +2,7 @@
 using Dalamud.Plugin;
 using System;
 
-namespace Globetrotter {
+namespace Weltenbummlerin {
     [Serializable]
     internal class Configuration : IPluginConfiguration {
         private IDalamudPluginInterface Plugin { get; set; } = null!;

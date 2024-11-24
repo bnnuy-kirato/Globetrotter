@@ -6,7 +6,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 
-namespace Globetrotter {
+namespace Weltenbummlerin {
     internal sealed class TreasureMaps : IDisposable {
         private const uint TreasureMapsCode = 0x54;
 

@@ -1,7 +1,7 @@
 ﻿using ImGuiNET;
 using System.Numerics;
 
-namespace Globetrotter {
+namespace Weltenbummlerin {
     internal class PluginUi {
         private Plugin Plugin { get; }
 
@@ -27,7 +27,7 @@ namespace Globetrotter {
 
             ImGui.SetNextWindowSize(new Vector2(350, 250), ImGuiCond.FirstUseEver);
 
-            if (!ImGui.Begin("Globetrotter settings", ref this._displaySettings)) {
+            if (!ImGui.Begin("Weltenbummlerin settings", ref this._displaySettings)) {
                 ImGui.End();
                 return;
             }

@@ -5,7 +5,7 @@ using Dalamud.Game;
 using Dalamud.IoC;
 using Dalamud.Plugin.Services;
 
-namespace Globetrotter {
+namespace Weltenbummlerin {
     // ReSharper disable once ClassNeverInstantiated.Global
     public class Plugin : IDalamudPlugin {
         private bool _disposedValue;
@@ -46,7 +46,7 @@ namespace Globetrotter {
             this.Interface.UiBuilder.OpenConfigUi += this.Ui.OpenSettings;
             this.GameGui.HoveredItemChanged += this.Maps.OnHover;
             this.CommandManager.AddHandler("/pglobetrotter", new CommandInfo(this.OnConfigCommand) {
-                HelpMessage = "Show the Globetrotter config",
+                HelpMessage = "Show the Weltenbummlerin config",
             });
             this.CommandManager.AddHandler("/tmap", new CommandInfo(this.OnCommand) {
                 HelpMessage = "Open the map and place a flag at the location of your current treasure map",
