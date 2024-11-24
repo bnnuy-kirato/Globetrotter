@@ -1,5 +1,5 @@
 ﻿using Dalamud.Hooking;
-using Lumina.Excel.Sheets;
+using Lumina.Excel.GeneratedSheets;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,20 +21,24 @@ namespace Globetrotter {
                 var mapToRow = new Dictionary<uint, uint>();
 
                 foreach (var rank in this.Plugin.DataManager.GetExcelSheet<TreasureHuntRank>()!) {
-                    var unopened = rank.ItemName.ValueNullable;
+                    var unopened = rank.ItemName.Value;
                     if (unopened == null) {
                         continue;
                     }
 
                     EventItem? opened;
                     // FIXME: remove this try/catch when lumina is fixed
-                 
-                    opened = rank.KeyItemName.ValueNullable;
+                    try {
+                        opened = rank.KeyItemName.Value;
+                    } catch (NullReferenceException) {
+                        opened = null;
+                    }
+
                     if (opened == null) {
                         continue;
                     }
 
-                    mapToRow[opened.Value.RowId] = rank.RowId;
+                    mapToRow[opened.RowId] = rank.RowId;
                 }
 
                 _mapToRow = mapToRow;
@@ -137,12 +141,16 @@ namespace Globetrotter {
             if (!this.MapToRow.TryGetValue(packet.EventItemId, out var rowId)) {
                 return;
             }
-            
-            var spot = this.Plugin.DataManager.GetSubrowExcelSheet<TreasureSpot>().GetRow(rowId);
-            
-            var loc = spot[(int) packet.SubRowId].Location.Value;
-            var map = loc.Map.Value;
-            var terr = loc.Territory.Value;
+
+            var spot = this.Plugin.DataManager.GetExcelSheet<TreasureSpot>()!.GetRow(rowId, packet.SubRowId);
+
+            var loc = spot?.Location?.Value;
+            var map = loc?.Map?.Value;
+            var terr = map?.TerritoryType?.Value;
+
+            if (terr == null) {
+                return;
+            }
 
             var x = ToMapCoordinate(loc!.X, map!.SizeFactor);
             var y = ToMapCoordinate(loc.Z, map.SizeFactor);
@@ -152,9 +160,8 @@ namespace Globetrotter {
                 ConvertMapCoordinateToRawPosition(x, map.SizeFactor),
                 ConvertMapCoordinateToRawPosition(y, map.SizeFactor)
             );
-            
+
             this.Plugin.GameGui.OpenMapWithMapLink(mapLink);
-            
 
             if (this._lastMap != null) {
                 this._lastMap.JustOpened = false;
