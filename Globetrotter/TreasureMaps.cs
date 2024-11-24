@@ -1,5 +1,5 @@
 ﻿using Dalamud.Hooking;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,25 +20,20 @@ namespace Globetrotter {
 
                 var mapToRow = new Dictionary<uint, uint>();
 
-                foreach (var rank in this.Plugin.DataManager.GetExcelSheet<TreasureHuntRank>()!) {
-                    var unopened = rank.ItemName.Value;
+                foreach (var rank in this.Plugin.DataManager.GetExcelSheet<TreasureHuntRank>()) {
+                    var unopened = rank.ItemName.ValueNullable;
                     if (unopened == null) {
                         continue;
                     }
 
                     EventItem? opened;
-                    // FIXME: remove this try/catch when lumina is fixed
-                    try {
-                        opened = rank.KeyItemName.Value;
-                    } catch (NullReferenceException) {
-                        opened = null;
-                    }
-
+                    
+                    opened = rank.KeyItemName.ValueNullable;
                     if (opened == null) {
                         continue;
                     }
 
-                    mapToRow[opened.RowId] = rank.RowId;
+                    mapToRow[opened.Value.RowId] = rank.RowId;
                 }
 
                 _mapToRow = mapToRow;
@@ -142,17 +137,15 @@ namespace Globetrotter {
                 return;
             }
 
-            var spot = this.Plugin.DataManager.GetExcelSheet<TreasureSpot>()!.GetRow(rowId, packet.SubRowId);
+            var spot = this.Plugin.DataManager.GetSubrowExcelSheet<TreasureSpot>().GetRow(rowId);
 
-            var loc = spot?.Location?.Value;
-            var map = loc?.Map?.Value;
-            var terr = map?.TerritoryType?.Value;
+            var loc = spot[(int) packet.SubRowId].Location.Value;
+            var map = loc.Map.Value;
+            var terr = loc.Territory.Value;
 
-            if (terr == null) {
-                return;
-            }
+            
 
-            var x = ToMapCoordinate(loc!.X, map!.SizeFactor);
+            var x = ToMapCoordinate(loc.X, map.SizeFactor);
             var y = ToMapCoordinate(loc.Z, map.SizeFactor);
             var mapLink = new MapLinkPayload(
                 terr.RowId,
@@ -205,15 +198,10 @@ namespace Globetrotter {
         }
     }
 
-    internal class TreasureMapPacket {
-        public uint EventItemId { get; }
-        public uint SubRowId { get; }
-        public bool JustOpened { get; set; }
-
-        public TreasureMapPacket(uint eventItemId, uint subRowId, bool justOpened) {
-            this.EventItemId = eventItemId;
-            this.SubRowId = subRowId;
-            this.JustOpened = justOpened;
-        }
+    internal class TreasureMapPacket(uint eventItemId, uint subRowId, bool justOpened)
+    {
+        public uint EventItemId { get; } = eventItemId;
+        public uint SubRowId { get; } = subRowId;
+        public bool JustOpened { get; set; } = justOpened;
     }
 }
